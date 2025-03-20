@@ -142,20 +142,28 @@ def display_round_winner(window, winner_name, winner_color):
     window.blit(text, text_rect)
 
 def display_game_winner(window, winner_name, winner_color):
+    # Create semi-transparent overlay
     overlay = pygame.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(128)
     overlay.fill(BLACK)
     window.blit(overlay, (0, 0))
     
+    # Display winner text
     font = pygame.font.Font(None, LARGE_FONT)
-    text = font.render(f"{winner_name} har vundet spillet!", True, winner_color)
-    text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
-    window.blit(text, text_rect)
+    winner_text = font.render(f"{winner_name} vandt spillet!", True, winner_color)
+    text_rect = winner_text.get_rect(center=(WIDTH//2, HEIGHT//2 - 50))
+    window.blit(winner_text, text_rect)
     
+    # Display options
     font = pygame.font.Font(None, MEDIUM_FONT)
-    text = font.render("Tryk MELLEMRUM for nyt spil", True, WHITE)
-    text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2 + 50))
-    window.blit(text, text_rect)
+    new_game_text = font.render("Tryk MELLEMRUM for nyt spil", True, WHITE)
+    menu_text = font.render("Tryk ESC for hovedmenu", True, WHITE)
+    
+    new_game_rect = new_game_text.get_rect(center=(WIDTH//2, HEIGHT//2 + 50))
+    menu_rect = menu_text.get_rect(center=(WIDTH//2, HEIGHT//2 + 100))
+    
+    window.blit(new_game_text, new_game_rect)
+    window.blit(menu_text, menu_rect)
 
 def main():
     """Main game loop"""
@@ -356,15 +364,25 @@ def main():
             winner_color = RED if spiller1.points > spiller2.points else BLUE
             display_game_winner(window, winner_name, winner_color)
             
-            # Check for new game
+            # Check for new game or return to menu
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
+                # Reset for new game
                 spiller1.points = 0
                 spiller2.points = 0
                 reset_round()
                 round_num = 1
                 round_start_time = time.time()
                 state = GameState.BATTLE
+            elif keys[pygame.K_ESCAPE]:
+                # Return to main menu
+                state = GameState.MENU
+                spiller1.points = 0
+                spiller2.points = 0
+                reset_round()
+                round_num = 1
+                round_start_time = time.time()
+                pygame.mixer.music.play(-1)  # Resume menu music
         
         elif state == GameState.PAUSE:
             # Draw the map as background for pause screen

@@ -1,6 +1,7 @@
 import pygame
 from config import *
 import random
+import math
 
 class Spiller:
     def __init__(self, x, y, color, name):
@@ -262,10 +263,10 @@ class Spiller:
         direction_x = self.body.centerx + (10 if self.facing_right else -10)
         pygame.draw.circle(window, BLACK, (direction_x, self.body.centery), 5)
         
-        # Draw damage and combo with better visibility
+        # Draw damage text
         damage_text = f"{int(self.damage)}%"
         if self.combo_count > 1:
-            damage_text += f" [{self.combo_count}x]"
+            damage_text += f" x{self.combo_count}"
         
         # Add outline to text for better visibility
         font = pygame.font.Font(None, MEDIUM_FONT)
@@ -277,6 +278,41 @@ class Spiller:
         for dx, dy in [(-1,-1), (-1,1), (1,-1), (1,1)]:
             window.blit(text_outline, (text_rect.x + dx, text_rect.y + dy))
         window.blit(text, text_rect)
+        
+        # Draw dash cooldown indicator
+        cooldown_radius = 15
+        cooldown_y = self.body.top - 60  # Position above damage text
+        
+        # Draw background circle
+        pygame.draw.circle(window, (50, 50, 50), (self.body.centerx, cooldown_y), cooldown_radius)
+        
+        if not self.can_dash:
+            # Calculate cooldown progress (0 to 1)
+            progress = self.dash_timer / DASH_COOLDOWN
+            
+            # Draw arc to show cooldown (fills up as cooldown progresses)
+            angle = progress * 360  # Convert progress to degrees
+            
+            # Draw filled arc
+            surface = pygame.Surface((cooldown_radius * 2, cooldown_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(surface, (*self.color[:3], 128), 
+                             (cooldown_radius, cooldown_radius), cooldown_radius)
+            
+            # Create mask for the arc
+            mask = pygame.Surface((cooldown_radius * 2, cooldown_radius * 2), pygame.SRCALPHA)
+            pygame.draw.arc(mask, (255, 255, 255, 255),
+                          (0, 0, cooldown_radius * 2, cooldown_radius * 2),
+                          0, math.radians(angle), cooldown_radius)
+            
+            # Apply mask to surface
+            surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            window.blit(surface, 
+                       (self.body.centerx - cooldown_radius, 
+                        cooldown_y - cooldown_radius))
+        else:
+            # Draw ready indicator
+            pygame.draw.circle(window, self.color, 
+                             (self.body.centerx, cooldown_y), cooldown_radius - 2)
     
     def get_center(self):
         return (self.body.centerx, self.body.centery)
