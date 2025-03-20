@@ -67,7 +67,7 @@ def display_winner(window, winner):
     text = font.render("Press SPACE to start a new match", True, WHITE)
     window.blit(text, (WIDTH//2 - text.get_width()//2, HEIGHT//2 + 50))
 
-def handle_collision(spiller1, spiller2):
+def handle_collision(spiller1, spiller2, punch_sound=None):
     """Handle collision between two players"""
     # Find distance between players
     center1 = spiller1.get_center()
@@ -76,6 +76,10 @@ def handle_collision(spiller1, spiller2):
     
     # If players are touching
     if distance < PLAYER_SIZE * 2 and not (spiller1.is_dead or spiller2.is_dead):
+        # Play collision sound if available
+        if punch_sound:
+            punch_sound.play()
+        
         # Determine direction based on players' position and direction
         direction = 1 if center1[0] < center2[0] else -1
         
@@ -172,6 +176,14 @@ def main():
     pygame.init()
     pygame.font.init()
     pygame.mixer.init()  # Initialize mixer for menu sounds
+    
+    # Load sound effects
+    try:
+        punch_sound = pygame.mixer.Sound("assets/punch.mp3")
+        punch_sound.set_volume(0.4)  # Set to 40% volume
+    except:
+        print("Warning: Could not load punch.mp3")
+        punch_sound = None
     
     window = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Sumo Battle!")
@@ -293,7 +305,7 @@ def main():
                 
                 # Handle collisions if both players are alive
                 if not spiller1.is_dead and not spiller2.is_dead:
-                    handle_collision(spiller1, spiller2)
+                    handle_collision(spiller1, spiller2, punch_sound)
                 
                 # Check for round end
                 if not waiting_for_respawn and (spiller1.is_dead or spiller2.is_dead):

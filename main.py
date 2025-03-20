@@ -43,8 +43,8 @@ class Menu:
         # Load and play background music
         try:
             pygame.mixer.music.load("assets/mainmenu.mp3")
-            pygame.mixer.music.set_volume(0.5)  # Set volume to 50%
-            pygame.mixer.music.play(-1)  # -1 means loop indefinitely
+            pygame.mixer.music.set_volume(0.5)  # volume til 50% 
+            pygame.mixer.music.play(-1)  # -1 er loop, 0 er ikke loop tror jeg
         except Exception as e:
             print(f"Warning: Could not load mainmenu.mp3: {e}")
             
