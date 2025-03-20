@@ -28,11 +28,11 @@ MAX_DAMAGE = 100          # Max damage percent
 RECOVERY_FRAMES = 15      # Frames where you can't take damage after hit
 
 # Dash settings
-DASH_FORCE = 18           # Dash speed
-DASH_LENGTH = 10          # Dash duration
-DASH_COOLDOWN = 240       # 4 seconds between each dash (60 FPS * 4)
-DASH_DAMAGE_BONUS = 1.2   # Damage bonus when dashing
-MAX_AIR_DASH = 1         # Keep one air dash
+DASH_FORCE = 18           # Dash force
+DASH_LENGTH = 10          # Dash length
+DASH_COOLDOWN = 240       # 4 seconds between each dash (FPS * 4)
+DASH_DAMAGE_BONUS = 1.8   # Damage bonus when dashing
+MAX_AIR_DASH = 1          # Keep one air dash
 
 # Platform settings
 PLATFORM_X = WIDTH * 0.15  # Platform position scales with new width
