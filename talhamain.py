@@ -122,7 +122,7 @@ def handle_collision(spiller1, spiller2, punch_sound=None):
             spiller1.damage = min(spiller1.damage + damage, MAX_DAMAGE)
             spiller1.apply_knockback((-direction, -0.15), force)
         
-        # Push players apart to avoid overlap
+        # Push players apart to avoid overlap, but only horizontally
         overlap = PLAYER_SIZE * 2 - distance
         if center1[0] < center2[0]:
             spiller1.body.x -= overlap / 2

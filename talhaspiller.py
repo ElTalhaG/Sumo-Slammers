@@ -61,11 +61,14 @@ class Spiller:
         
         # Normal movement
         if not self.is_dashing:
-            if keys[left]:
+            # Reset horizontal speed if no movement keys are pressed
+            if not keys[left] and not keys[right]:
+                self.speed_x = 0
+            elif keys[left]:
                 self.speed_x = -MOVEMENT_SPEED
                 self.facing_right = False
                 self.dash_direction = -1
-            if keys[right]:
+            elif keys[right]:
                 self.speed_x = MOVEMENT_SPEED
                 self.facing_right = True
                 self.dash_direction = 1
@@ -126,40 +129,28 @@ class Spiller:
         
         # Apply gravity
         self.speed_y += GRAVITY
-        self.body.y += self.speed_y
+        
+        # Update position
         self.body.x += self.speed_x
+        self.body.y += self.speed_y
         
-        # Apply air resistance
-        self.speed_x *= AIR_RESISTANCE
-        
-        # Check if fallen into void - make sure this only happens once
-        if self.has_fallen():
-            self.is_dead = True
-            self.speed_x = 0  # Stop horizontal movement when dead
-            return True
-        
-        # Screen boundaries
-        if self.body.left < 0:
-            self.body.left = 0
+        # Only constrain horizontal movement to world boundaries
+        if self.body.x < WORLD_LEFT_BOUNDARY:
+            self.body.x = WORLD_LEFT_BOUNDARY
             self.speed_x = 0
-        if self.body.right > WIDTH:
-            self.body.right = WIDTH
+        elif self.body.x > WORLD_RIGHT_BOUNDARY - self.body.width:
+            self.body.x = WORLD_RIGHT_BOUNDARY - self.body.width
             self.speed_x = 0
         
-        # Platform collision - only check if not dead and approaching from above
-        self.on_ground = False
-        if (not self.is_dead and
-            self.body.bottom >= platform.top and 
-            self.body.top < platform.top and  # Only allow collision from above
-            self.body.left < platform.right and 
-            self.body.right > platform.left and 
-            self.speed_y >= 0):
-            self.body.bottom = platform.top
-            self.speed_y = 0
-            self.on_ground = True
-            self.air_dash = MAX_AIR_DASH
-        elif self.body.top > platform.top:  # If below platform
-            self.is_dead = True
+        # Platform collision (keep this part)
+        if self.body.bottom > platform.y and self.body.top < platform.y:
+            if platform.x < self.body.centerx < platform.x + platform.width:
+                self.body.bottom = platform.y
+                self.speed_y = 0
+                self.on_ground = True
+                self.air_dash = MAX_AIR_DASH
+        else:
+            self.on_ground = False
         
         # Update timers
         if self.recovery_frames > 0:

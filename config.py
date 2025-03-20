@@ -52,3 +52,7 @@ MAX_POINTS = 3            # Points needed to win
 LARGE_FONT = 48           # Large headers
 MEDIUM_FONT = 36          # Medium text
 SMALL_FONT = 24           # Small text 
+
+# World boundaries (wider than screen)
+WORLD_LEFT_BOUNDARY = -WIDTH  # Allow movement 1 screen width to the left
+WORLD_RIGHT_BOUNDARY = WIDTH * 2  # Allow movement 2 screen widths to the right 
