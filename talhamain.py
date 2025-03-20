@@ -1,6 +1,8 @@
 import pygame
 import math
 import time
+import sys
+import os
 from config import *
 from talhaspiller import Spiller
 from bane2 import Bane
@@ -365,24 +367,26 @@ def main():
             display_game_winner(window, winner_name, winner_color)
             
             # Check for new game or return to menu
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_SPACE]:
-                # Reset for new game
-                spiller1.points = 0
-                spiller2.points = 0
-                reset_round()
-                round_num = 1
-                round_start_time = time.time()
-                state = GameState.BATTLE
-            elif keys[pygame.K_ESCAPE]:
-                # Return to main menu
-                state = GameState.MENU
-                spiller1.points = 0
-                spiller2.points = 0
-                reset_round()
-                round_num = 1
-                round_start_time = time.time()
-                pygame.mixer.music.play(-1)  # Resume menu music
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        # Clean up resources
+                        pygame.mixer.music.stop()
+                        pygame.quit()
+                        # Restart the game
+                        python = sys.executable
+                        os.execl(python, python, *sys.argv)
+                    elif event.key == pygame.K_ESCAPE:
+                        # Return to main menu
+                        state = GameState.MENU
+                        spiller1.points = 0
+                        spiller2.points = 0
+                        reset_round()
+                        round_num = 1
+                        round_start_time = time.time()
+                        pygame.mixer.music.play(-1)  # Resume menu music
         
         elif state == GameState.PAUSE:
             # Draw the map as background for pause screen
