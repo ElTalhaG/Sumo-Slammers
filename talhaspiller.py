@@ -145,9 +145,11 @@ class Spiller:
             self.body.right = WIDTH
             self.speed_x = 0
         
-        # Platform collision - only check if not dead
+        # Platform collision - only check if not dead and approaching from above
         self.on_ground = False
-        if (self.body.bottom >= platform.top and 
+        if (not self.is_dead and
+            self.body.bottom >= platform.top and 
+            self.body.top < platform.top and  # Only allow collision from above
             self.body.left < platform.right and 
             self.body.right > platform.left and 
             self.speed_y >= 0):
@@ -155,6 +157,8 @@ class Spiller:
             self.speed_y = 0
             self.on_ground = True
             self.air_dash = MAX_AIR_DASH
+        elif self.body.top > platform.top:  # If below platform
+            self.is_dead = True
         
         # Update timers
         if self.recovery_frames > 0:
@@ -275,10 +279,11 @@ class Spiller:
         window.blit(text, text_rect)
     
     def get_center(self):
-        return [self.body.centerx, self.body.centery]
+        return (self.body.centerx, self.body.centery)
     
     def has_fallen(self):
-        return self.body.top > HEIGHT + 100
+        """Check if player has fallen into the void"""
+        return self.body.top > HEIGHT - PLATFORM_HEIGHT  # Consider fallen if below platform height
     
     def start_position(self):
         self.is_dead = False

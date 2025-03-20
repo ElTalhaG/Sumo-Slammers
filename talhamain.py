@@ -193,7 +193,7 @@ def main():
     showing_round_start = False
     
     def reset_round():
-        nonlocal showing_round_start, round_start_display_timer
+        nonlocal showing_round_start, round_start_display_timer, round_winner
         # Reset player positions
         spiller1.body.x = platform.x + SPAWN_DISTANCE
         spiller1.body.y = platform.y - SPAWN_HEIGHT
@@ -201,9 +201,19 @@ def main():
         spiller2.body.y = platform.y - SPAWN_HEIGHT
         spiller1.start_position()
         spiller2.start_position()
+        # Reset dead state
+        spiller1.is_dead = False
+        spiller2.is_dead = False
+        # Reset round winner
+        round_winner = None
         # Show round start display
         showing_round_start = True
         round_start_display_timer = pygame.time.get_ticks()
+    
+    # Track who fell first
+    first_to_fall = None
+    # Track the winner of the current round
+    round_winner = None
     
     while running:
         now = time.time()
@@ -227,27 +237,59 @@ def main():
             # Only update players if not showing round start
             if not showing_round_start:
                 # Update players
-                spiller1.move(pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s)
-                spiller2.move(pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN)
+                if not spiller1.is_dead:
+                    spiller1.move(pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s)
+                if not spiller2.is_dead:
+                    spiller2.move(pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN)
                 
-                # Update and check for void falls
-                fallen1 = spiller1.update(platform)
-                fallen2 = spiller2.update(platform)
+                # Check for void falls
+                if not waiting_for_respawn:  # Only check for falls if round is not over
+                    if not spiller1.is_dead and spiller1.body.top > platform.y:  # If player is below platform
+                        spiller1.is_dead = True
+                        if first_to_fall is None:
+                            first_to_fall = 1
+                    
+                    if not spiller2.is_dead and spiller2.body.top > platform.y:  # If player is below platform
+                        spiller2.is_dead = True
+                        if first_to_fall is None:
+                            first_to_fall = 2
                 
-                # Handle collisions
-                handle_collision(spiller1, spiller2)
+                # Update players
+                if not spiller1.is_dead:
+                    spiller1.update(platform)
+                if not spiller2.is_dead:
+                    spiller2.update(platform)
                 
-                # Check for ring out
-                if not waiting_for_respawn and (fallen1 or fallen2):
+                # Handle collisions if both players are alive
+                if not spiller1.is_dead and not spiller2.is_dead:
+                    handle_collision(spiller1, spiller2)
+                
+                # Check for round end
+                if not waiting_for_respawn and (spiller1.is_dead or spiller2.is_dead):
                     waiting_for_respawn = True
                     respawn_timer = current_time
                     
-                    if fallen1:
+                    # Award point based on who fell first
+                    if first_to_fall == 1:  # Red fell first, Blue wins
                         spiller2.points += 1
+                        round_winner = "blue"
                         display_round_winner(window, "Blå Spiller", BLUE)
-                    else:
+                    elif first_to_fall == 2:  # Blue fell first, Red wins
                         spiller1.points += 1
+                        round_winner = "red"
                         display_round_winner(window, "Rød Spiller", RED)
+                    else:  # If no one has fallen yet, but someone is dead
+                        if spiller1.is_dead:  # Red is dead, Blue wins
+                            spiller2.points += 1
+                            round_winner = "blue"
+                            display_round_winner(window, "Blå Spiller", BLUE)
+                        else:  # Blue is dead, Red wins
+                            spiller1.points += 1
+                            round_winner = "red"
+                            display_round_winner(window, "Rød Spiller", RED)
+                    
+                    # Reset first_to_fall for next round but keep track of who won
+                    first_to_fall = None
                     
                     # Check if game is over
                     if spiller1.points >= MAX_POINTS or spiller2.points >= MAX_POINTS:
@@ -278,9 +320,9 @@ def main():
             
             # If waiting for respawn, keep showing the winner message
             elif waiting_for_respawn:
-                if fallen1:
+                if round_winner == "blue":
                     display_round_winner(window, "Blå Spiller", BLUE)
-                else:
+                elif round_winner == "red":
                     display_round_winner(window, "Rød Spiller", RED)
         
         elif state == GameState.GAME_OVER:
