@@ -283,7 +283,8 @@ class Spiller:
     
     def has_fallen(self):
         """Check if player has fallen into the void"""
-        return self.body.top > HEIGHT - PLATFORM_HEIGHT  # Consider fallen if below platform height
+        # Consider fallen if player is way below the platform
+        return self.body.top > HEIGHT - (HEIGHT * 0.2)  # Increased void area
     
     def start_position(self):
         self.is_dead = False

@@ -4,6 +4,7 @@ import time
 from config import *
 from talhaspiller import Spiller
 from bane2 import Bane
+from main import Menu  # Add this import
 
 class GameState:
     MENU = 0
@@ -160,9 +161,13 @@ def main():
     """Main game loop"""
     pygame.init()
     pygame.font.init()
+    pygame.mixer.init()  # Initialize mixer for menu sounds
     
     window = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Sumo Battle!")
+    
+    # Create menu
+    menu = Menu(WIDTH, HEIGHT)
     
     # Create the Japanese themed map first
     bane = Bane(WIDTH, HEIGHT)
@@ -177,8 +182,8 @@ def main():
     clock = pygame.time.Clock()
     running = True
     
-    # Game state
-    state = GameState.BATTLE
+    # Game state - start with MENU instead of BATTLE
+    state = GameState.MENU
     round_num = 1
     round_start_time = time.time()
     
@@ -216,21 +221,37 @@ def main():
     round_winner = None
     
     while running:
-        now = time.time()
-        time_left = max(0, ROUND_TIME - (now - round_start_time))
-        current_time = pygame.time.get_ticks()
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    if state == GameState.BATTLE:
+        if state == GameState.MENU:
+            window.fill((0, 0, 0))
+            menu.draw(window)
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    
+                action = menu.handle_input(event)
+                if action == "Start Game":
+                    state = GameState.BATTLE
+                    pygame.mixer.music.stop()  # Stop menu music
+                elif action == "Quit":
+                    running = False
+                    
+        elif state == GameState.BATTLE:
+            # Handle regular game events first
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        state = GameState.MENU
+                        pygame.mixer.music.play(-1)  # Resume menu music
+                    elif event.key == pygame.K_p:
                         state = GameState.PAUSE
-                    else:
-                        state = GameState.BATTLE
-        
-        if state == GameState.BATTLE:
+            
+            now = time.time()
+            time_left = max(0, ROUND_TIME - (now - round_start_time))
+            current_time = pygame.time.get_ticks()
+            
             # Tegn banen med spillernes skadeprocent
             bane.draw(window, spiller1, spiller2)
             

@@ -1,6 +1,6 @@
 # Window settings
-WIDTH = 800  # Match your map width
-HEIGHT = 600  # Match your map height
+WIDTH = 1200  # Increased from 800
+HEIGHT = 800  # Increased from 600
 FRAME_RATE = 60
 
 # Colors in RGB format
@@ -35,18 +35,14 @@ DASH_DAMAGE_BONUS = 1.2   # Damage bonus when dashing
 MAX_AIR_DASH = 1         # Keep one air dash
 
 # Platform settings
-PLATFORM_X = WIDTH * 0.15  # Adjust to match your map's platform position
-PLATFORM_Y = HEIGHT * 0.75  # Adjust to match your map's platform height
-PLATFORM_WIDTH = WIDTH * 0.7  # Match your map's platform width
-PLATFORM_HEIGHT = 20  # Match your map's platform height
+PLATFORM_X = WIDTH * 0.15  # Platform position scales with new width
+PLATFORM_Y = HEIGHT * 0.6  # Platform is higher up to make void bigger
+PLATFORM_WIDTH = WIDTH * 0.7  # Platform width scales with new width
+PLATFORM_HEIGHT = 20  # Keep same height
 
 # Spawn settings
-# Players are placed at the edges of the platform
-# SPAWN_DISTANCE = 0 means they start exactly at the edge
-SPAWN_DISTANCE = 50       # Small distance from edge so players don't slide off
-
-# Adjust how high above the platform players start
-SPAWN_HEIGHT = 150        # Fixed height above platform
+SPAWN_DISTANCE = 100  # Increased from 50 for wider platform
+SPAWN_HEIGHT = 200  # Increased from 150 for higher spawns
 
 # Game settings
 ROUND_TIME = 60           # 1 min per round
