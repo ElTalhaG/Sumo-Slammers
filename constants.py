@@ -1,4 +1,4 @@
-# Game physics constants
+# Spillets fysiske konstanter
 GRAVITY = 0.5
 JUMP_STRENGTH = -10
 PLAYER_SPEED = 5

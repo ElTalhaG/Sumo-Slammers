@@ -6,8 +6,20 @@ from constants import *
 
 
 class Bane:
+    """
+    Bane klassen håndterer spillets verden og terræn.
+    Indeholder metoder til at tegne og opdatere spillets miljø.
+    """
+    
     def __init__(self, width, height):
-        # initialize funktion banens dimensioner
+        """
+        Konstruktør for Bane klassen.
+        
+        Parametre:
+            width (int): Skærmens bredde i pixels
+            height (int): Skærmens højde i pixels
+        """
+        # Gem banens dimensioner som attributter
         self.width = width  # Bredde af banen
         self.height = height  # Højde af banen
         
@@ -55,11 +67,23 @@ class Bane:
 
     # Hent de aktuelle farver baseret på temaet
     def get_current_colors(self):
+        """
+        Henter det aktuelle farvetemas farver.
+        
+        Returværdi:
+            dict: Dictionary med de aktuelle temafarver
+        """
         # Returner farverne for det aktuelle tema
         return self.color_themes[self.current_theme]
 
     # Opdater banen (f.eks. skift mellem dag og nat)
     def update(self, current_time):
+        """
+        Opdaterer banens tilstand.
+        
+        Parametre:
+            current_time (int): Nuværende spilletid i millisekunder
+        """
         # Tjek om det er tid til at skifte tema
         if current_time - self.last_theme_change > self.theme_change_interval:
             # Skift mellem dag og nat
@@ -69,21 +93,26 @@ class Bane:
 
     # Tegn banen med alle elementer 
     def draw(self, surface: pygame.Surface, spiller1=None, spiller2=None):
-        # Hent de aktuelle farver
-        colors = self.get_current_colors()
+        """
+        Tegner hele banen med alle elementer.
         
-        # Opret gradient himmel - mørk indigo til marineblå for skumring/nat effekt
+        Parametre:
+            surface (pygame.Surface): Overfladen der skal tegnes på
+            spiller1 (Spiller): Første spiller objekt, bruges til skadevisning
+            spiller2 (Spiller): Anden spiller objekt, bruges til skadevisning
+        """
+        # Opret gradient baggrund
         for y in range(self.height):
-            # Opret gradient fra mørk indigo øverst til marineblå nær horisonten
+            # Beregn gradientværdi baseret på y-position
             gradient_value = max(0, min(50 + y // 2, 80))
             pygame.draw.line(surface, (gradient_value//2, gradient_value//2, gradient_value), 
                           (0, y), (self.width, y))
         
-        # Draw void area (dark abyss below platform)
+        # Tegn afgrunden under platformen
         void_rect = pygame.Rect(0, self.void_y, self.width, self.height - self.void_y)
         pygame.draw.rect(surface, (10, 10, 15), void_rect)
         
-        # Add some particle effects in the void
+        # Tilføj partikkeleffekter i afgrunden
         for _ in range(20):
             particle_x = random.randint(0, self.width)
             particle_y = random.randint(int(self.void_y), self.height)
@@ -91,15 +120,15 @@ class Bane:
             particle_color = (30, 30, 40)
             pygame.draw.circle(surface, particle_color, (particle_x, particle_y), particle_size)
         
-        # Tegn fjerne bakker
-        hill_color = (30, 40, 45)  # Mørke blå-grønne bakker
+        # Definér og tegn baggrundsbjerge
+        hill_color = (30, 40, 45)  # Mørk blågrøn farve til fjerne bjerge
         hills = [
-            # Venstre fjerne bakker
+            # Venstre bjergkæde
             [(0, self.height * 0.6), 
              (self.width * 0.15, self.height * 0.55), 
              (self.width * 0.35, self.height * 0.58), 
              (self.width * 0.4, self.height * 0.6)],
-            # Højre fjerne bakker
+            # Højre bjergkæde
             [(self.width * 0.6, self.height * 0.6), 
              (self.width * 0.7, self.height * 0.57), 
              (self.width * 0.9, self.height * 0.59), 
@@ -107,60 +136,18 @@ class Bane:
              (self.width, self.height * 0.65)]
         ]
         
-        # Tegn hver bakke som en polygon
+        # Tegn bjergkæderne
         for hill in hills:
             pygame.draw.polygon(surface, hill_color, hill)
         
-        # Tegn Mount Fuji i midten
-        # Bjergets base (mørk del)
-        mountain_base = [
-            (self.width * 0.5, self.height * 0.2),    # Toppunkt
-            (self.width * 0.46, self.height * 0.25),  # Let kurve til højre for toppen
-            (self.width * 0.42, self.height * 0.28),  # Højre skulder
-            (self.width * 0.36, self.height * 0.35),  # Højre skråning
-            (self.width * 0.28, self.height * 0.45),  # Midt-højre skråning
-            (self.width * 0.2, self.height * 0.55),   # Nedre højre skråning
-            (self.width * 0.12, self.height * 0.7),   # Højre base
-            (self.width * 0.88, self.height * 0.7),   # Venstre base
-            (self.width * 0.8, self.height * 0.55),   # Nedre venstre skråning
-            (self.width * 0.72, self.height * 0.45),  # Midt-venstre skråning
-            (self.width * 0.64, self.height * 0.35),  # Venstre skråning
-            (self.width * 0.58, self.height * 0.28),  # Venstre skulder
-            (self.width * 0.54, self.height * 0.25),  # Let kurve til venstre for toppen
-        ]
-        # Tegn bjergets base med mørk brun-grå farve
-        pygame.draw.polygon(surface, (60, 50, 55), mountain_base)
+        # Tegn Mount Fuji i centrum
+        self._draw_mount_fuji(surface)
         
-        # Tegn snehætte med uregelmæssig, naturlig kant
-        snow_cap = [
-            (self.width * 0.5, self.height * 0.2),    # Toppunkt
-            (self.width * 0.46, self.height * 0.25),  # Højre for toppen
-            (self.width * 0.42, self.height * 0.28),  # Højre skulder
-            (self.width * 0.39, self.height * 0.31),  # Sne dyk 1
-            (self.width * 0.37, self.height * 0.32),  # Sne punkt 1
-            (self.width * 0.35, self.height * 0.33),  # Sne dyk 2
-            (self.width * 0.33, self.height * 0.34),  # Sne punkt 2
-            (self.width * 0.31, self.height * 0.39),  # Sne dyk 3
-            (self.width * 0.29, self.height * 0.4),   # Sne kurve
-            (self.width * 0.28, self.height * 0.41),  # Sne slut højre
-            (self.width * 0.72, self.height * 0.41),  # Sne slut venstre
-            (self.width * 0.71, self.height * 0.4),   # Sne kurve
-            (self.width * 0.69, self.height * 0.39),  # Sne dyk 3 spejl
-            (self.width * 0.67, self.height * 0.34),  # Sne punkt 2 spejl
-            (self.width * 0.65, self.height * 0.33),  # Sne dyk 2 spejl
-            (self.width * 0.63, self.height * 0.32),  # Sne punkt 1 spejl
-            (self.width * 0.61, self.height * 0.31),  # Sne dyk 1 spejl
-            (self.width * 0.58, self.height * 0.28),  # Venstre skulder
-            (self.width * 0.54, self.height * 0.25),  # Venstre for toppen
-        ]
-        # Tegn snehætten med hvid farve
-        pygame.draw.polygon(surface, (240, 240, 240), snow_cap)
-        
-        # Tegn træerne med spillernes skadeprocent
+        # Opdater og tegn kirsebærtræer med spillernes skadeprocent
         left_damage = spiller1.damage if spiller1 else 0
         right_damage = spiller2.damage if spiller2 else 0
         
-        # Tegn venstre træ med spiller 1's skade
+        # Tegn træerne på hver side
         self.draw_cherry_tree(
             self.tree_positions[0]["x"],
             self.height,
@@ -169,7 +156,6 @@ class Bane:
             surface=surface
         )
         
-        # Tegn højre træ med spiller 2's skade
         self.draw_cherry_tree(
             self.tree_positions[1]["x"],
             self.height,
@@ -178,14 +164,81 @@ class Bane:
             surface=surface
         )
         
-        # Tegn en torii-port silhuet (traditionel japansk port)
-        torii_color = (180, 40, 40)  # Rød torii-port
-        torii_x = self.width * 0.5
-        torii_y = self.height * 0.65
+        # Tegn torii-porten (traditionel japansk portal)
+        self._draw_torii(surface)
+        
+        # Tegn terræn og platform
+        self._draw_terrain(surface)
+        self._draw_platforms(surface)
+
+    def _draw_mount_fuji(self, surface):
+        """
+        Hjælpemetode til at tegne Mount Fuji.
+        
+        Parametre:
+            surface (pygame.Surface): Overfladen der skal tegnes på
+        """
+        # Definér bjergets basepunkter
+        mountain_base = [
+            (self.width * 0.5, self.height * 0.2),    # Toppunkt
+            (self.width * 0.46, self.height * 0.25),  # Højre øvre kurve
+            (self.width * 0.42, self.height * 0.28),  # Højre skulder
+            (self.width * 0.36, self.height * 0.35),  # Højre skråning
+            (self.width * 0.28, self.height * 0.45),  # Højre midterskråning
+            (self.width * 0.2, self.height * 0.55),   # Højre nedre skråning
+            (self.width * 0.12, self.height * 0.7),   # Højre base
+            (self.width * 0.88, self.height * 0.7),   # Venstre base
+            (self.width * 0.8, self.height * 0.55),   # Venstre nedre skråning
+            (self.width * 0.72, self.height * 0.45),  # Venstre midterskråning
+            (self.width * 0.64, self.height * 0.35),  # Venstre skråning
+            (self.width * 0.58, self.height * 0.28),  # Venstre skulder
+            (self.width * 0.54, self.height * 0.25),  # Venstre øvre kurve
+        ]
+        
+        # Tegn bjergets base
+        pygame.draw.polygon(surface, (60, 50, 55), mountain_base)
+        
+        # Definér og tegn snedækket
+        snow_cap = [
+            (self.width * 0.5, self.height * 0.2),    # Toppunkt
+            (self.width * 0.46, self.height * 0.25),  # Højre øvre kant
+            (self.width * 0.42, self.height * 0.28),  # Højre skulder
+            (self.width * 0.39, self.height * 0.31),  # Højre snekant 1
+            (self.width * 0.37, self.height * 0.32),  # Højre snepunkt 1
+            (self.width * 0.35, self.height * 0.33),  # Højre snekant 2
+            (self.width * 0.33, self.height * 0.34),  # Højre snepunkt 2
+            (self.width * 0.31, self.height * 0.39),  # Højre snekant 3
+            (self.width * 0.29, self.height * 0.4),   # Højre snekurve
+            (self.width * 0.28, self.height * 0.41),  # Højre sneafslutning
+            (self.width * 0.72, self.height * 0.41),  # Venstre sneafslutning
+            (self.width * 0.71, self.height * 0.4),   # Venstre snekurve
+            (self.width * 0.69, self.height * 0.39),  # Venstre snekant 3
+            (self.width * 0.67, self.height * 0.34),  # Venstre snepunkt 2
+            (self.width * 0.65, self.height * 0.33),  # Venstre snekant 2
+            (self.width * 0.63, self.height * 0.32),  # Venstre snepunkt 1
+            (self.width * 0.61, self.height * 0.31),  # Venstre snekant 1
+            (self.width * 0.58, self.height * 0.28),  # Venstre skulder
+            (self.width * 0.54, self.height * 0.25),  # Venstre øvre kant
+        ]
+        
+        # Tegn snedækket
+        pygame.draw.polygon(surface, (240, 240, 240), snow_cap)
+
+    def _draw_torii(self, surface):
+        """
+        Hjælpemetode til at tegne torii-porten.
+        
+        Parametre:
+            surface (pygame.Surface): Overfladen der skal tegnes på
+        """
+        # Definér torii-portens dimensioner
+        torii_color = (180, 40, 40)  # Traditionel rød farve
+        torii_x = self.width * 0.5   # Centrér porten
+        torii_y = self.height * 0.65  # Portens højdeplacering
         torii_width = self.width * 0.15
         torii_height = self.height * 0.1
         
-        # Torii søjler
+        # Tegn søjlerne
         pygame.draw.rect(surface, torii_color, 
                       (torii_x - torii_width/2, torii_y, 
                        torii_width * 0.1, torii_height))
@@ -193,32 +246,45 @@ class Bane:
                       (torii_x + torii_width/2 - torii_width * 0.1, torii_y, 
                        torii_width * 0.1, torii_height))
         
-        # Torii topbjælker
+        # Tegn tværbjælkerne
         pygame.draw.rect(surface, torii_color, 
                       (torii_x - torii_width/2 - torii_width * 0.05, 
                        torii_y, torii_width * 1.1, torii_height * 0.15))
         pygame.draw.rect(surface, torii_color, 
                       (torii_x - torii_width/2, torii_y + torii_height * 0.25, 
                        torii_width, torii_height * 0.1))
+
+    def _draw_terrain(self, surface):
+        """
+        Hjælpemetode til at tegne terrænet.
         
-        # Tegn jorden med lidt tekstur
+        Parametre:
+            surface (pygame.Surface): Overfladen der skal tegnes på
+        """
+        # Tegn jordoverfladen
         ground_rect = pygame.Rect(0, self.height * 0.7, self.width, self.height * 0.3)
         pygame.draw.rect(surface, (40, 50, 40), ground_rect)
         
-        # Tilføj græs/tekstur til jorden
+        # Tilføj græsstrå for tekstur
         for _ in range(100):
             grass_x = random.randint(0, self.width)
             grass_height = random.randint(2, 5)
             pygame.draw.line(surface, (50, 70, 50), 
                           (grass_x, self.height * 0.7), 
                           (grass_x, self.height * 0.7 - grass_height))
+
+    def _draw_platforms(self, surface):
+        """
+        Hjælpemetode til at tegne platforme.
         
-        # Tegn platform og andre spilelementer
+        Parametre:
+            surface (pygame.Surface): Overfladen der skal tegnes på
+        """
         for platform in self.platform_segments:
-            # Hovedplatform med traditionel træfarve
+            # Tegn hovedplatformen
             pygame.draw.rect(surface, (120, 80, 40), platform)
             
-            # Tilføj dekorative linjer (som træårer)
+            # Tilføj dekorative træårer
             line_spacing = 20
             for y in range(platform.top, platform.bottom, line_spacing):
                 pygame.draw.line(surface, (90, 60, 30),
@@ -228,44 +294,51 @@ class Bane:
             # Tilføj platformkanter
             pygame.draw.rect(surface, (90, 60, 30), platform, 4)
             
-            # Tilføj traditionelle japanske platformendestykker
+            # Tilføj traditionelle endestykker
             cap_width = 8
             pygame.draw.rect(surface, (140, 90, 40), 
                           (platform.left - cap_width//2, platform.top - 5,
                            platform.width + cap_width, 10))
-
-        # Add platform edges/shadows
-        for platform in self.platform_segments:
-            # Bottom shadow
+            
+            # Tilføj skyggeeffekter
             pygame.draw.rect(surface, (80, 50, 25), 
                            (platform.left, platform.bottom, platform.width, 3))
-            # Side shadows
             pygame.draw.rect(surface, (100, 65, 35), 
                            (platform.left - 2, platform.top, 2, platform.height))
             pygame.draw.rect(surface, (100, 65, 35), 
                            (platform.right, platform.top, 2, platform.height))
 
-    # Tjek om en position er på en platform
     def is_on_platform(self, x, y):
-        # Gennemgå alle platformsegmenter
+        """
+        Tjekker om en given position er på en platform.
+        
+        Parametre:
+            x (float): X-koordinat at tjekke
+            y (float): Y-koordinat at tjekke
+            
+        Returværdi:
+            bool: Sand hvis positionen er på en platform, ellers falsk
+        """
         for platform in self.platform_segments:
-            # Tjek om positionen er inden for platformens grænser
-            if platform.collidepoint(x, y):
+            if (platform.left <= x <= platform.right and
+                platform.top <= y <= platform.bottom):
                 return True
-        # Hvis ingen platform blev fundet, returner False
         return False
 
-    # Find y-koordinaten for den øverste platform ved en given x-koordinat
     def get_platform_y(self, x):
-        # Initialiser med en høj værdi
+        """
+        Finder y-koordinaten for den øverste platform ved en given x-koordinat.
+        
+        Parametre:
+            x (float): X-koordinat at tjekke
+            
+        Returværdi:
+            float eller None: Y-koordinat for platformen, eller None hvis ingen platform findes
+        """
         min_y = float('inf')
-        # Gennemgå alle platformsegmenter
         for platform in self.platform_segments:
-            # Tjek om x-koordinaten er inden for platformens x-grænser
             if platform.left <= x <= platform.right:
-                # Opdater min_y hvis denne platform er højere oppe
                 min_y = min(min_y, platform.top)
-        # Returner den fundne y-koordinat eller None hvis ingen platform blev fundet
         return min_y if min_y != float('inf') else None
 
     def handle_input(self):
