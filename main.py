@@ -18,7 +18,7 @@ class Menu:
         self.menu_font = pygame.font.Font(None, 50)
         
         # Menu valgmuligheder og knapper
-        self.options = ["Start Game", "Controls", "Quit"]
+        self.options = ["Start Game", "Quit"]
         self.selected = 0  # Indeks for valgt menupunkt
         self.buttons = []  # Liste til rektangler for hver menu mulighed
         
