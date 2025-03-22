@@ -320,7 +320,7 @@ class Spiller:
         self.is_dead = False
         self.death_timer = 0
         self.damage = 0
-        self.combo_count = 0
+        self.combo_count = 0 #
         self.combo_timer = 0
         self.last_attacker = None
         self.speed_x = 0
