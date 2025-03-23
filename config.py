@@ -1,3 +1,4 @@
+# Af Talha og Azad (fælles kode stumper)
 # Vindue indstillinger
 WIDTH = 1200  # Skærmbredde i pixels
 HEIGHT = 800  # Skærmhøjde i pixels

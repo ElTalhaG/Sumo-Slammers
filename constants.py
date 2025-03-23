@@ -1,3 +1,4 @@
+# Af Talha
 # spillets fysiske konstanter
 
 GRAVITY = 0.5

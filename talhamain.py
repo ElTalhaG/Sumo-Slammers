@@ -1,3 +1,5 @@
+# Af Talha og Azad (fælles kode stumper)
+
 import pygame
 import math
 import time
@@ -201,7 +203,7 @@ def main():
     bane = Bane(WIDTH, HEIGHT)
     
     # Opret spillere med faste startpositioner - brug platform fra banen
-    platform = bane.platform_segments[0]  # Hent platformen fra banen
+    platform = bane.platformSegments[0]  # Hent platformen fra banen
     spiller1 = Spiller(platform.x + SPAWN_DISTANCE, 
                       platform.y - SPAWN_HEIGHT, RED, "Rød Spiller")
     spiller2 = Spiller(platform.x + platform.width - SPAWN_DISTANCE, 
