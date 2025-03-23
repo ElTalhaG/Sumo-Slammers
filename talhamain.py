@@ -1,5 +1,4 @@
 # Af Talha og Azad (fælles kode stumper)
-
 import pygame
 import math
 import time
