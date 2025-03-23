@@ -99,7 +99,7 @@ def handle_collision(spiller1, spiller2, punch_sound=None):
         spiller2_force = abs(spiller2.speed_x) * (1.5 if spiller2.is_dashing else 1)  # Beregner kraft for spiller 2
         if (spiller1.is_dashing or spiller1_force > 2) and spiller2.recovery_frames == 0:  # Tjekker om spiller 1 angriber
             force = BASE_KNOCKBACK * (1.8 if spiller1.is_dashing else 1)  # Beregner knockback kraft
-            force *= (1 + spiller2.damage / 100)  # Justerer kraft baseret på skade
+            force *= (1 + spiller2.damage / 100)  # Øg kraft baseret på skadeprocent (jo mere skade, jo længere knockback)
             if spiller1 == spiller2.last_attacker:  # Opdaterer combo system
                 spiller2.combo_count += 1
             else:

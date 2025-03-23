@@ -42,9 +42,9 @@ class Spiller:
         self.is_attacking = False  # Angrebstilstand
         
         # Combo system
-        self.combo_timer = 0  # Combo varighed
-        self.combo_count = 0  # Combo tæller
-        self.last_attacker = None  # Seneste angriber
+        self.combo_timer = 0  # Øg combo hvis man bliver ramt flere gange hurtigt
+        self.combo_count = 0  # Tæller antal gange man har været i combo
+        self.last_attacker = None  # Gemmes hvem der remt sidste gange
         
         # Partikel system
         self.particles = []  # Liste til partikler
@@ -79,10 +79,10 @@ class Spiller:
                 self.dash_direction = 1
                 
             # Hop mekanik
-            if keys[jump] and self.on_ground:
-                self.speed_y = JUMP_FORCE
-                self.on_ground = False
-                self.add_jump_effect()
+            if keys[jump] and self.on_ground:   # Hvis hoppetasten trykkes og spilleren er på jorden:
+                self.speed_y = JUMP_FORCE   # Giv spilleren opadgående kraft (negativ værdi)
+                self.on_ground = False     # Spilleren er nu i luften
+                self.add_jump_effect()     # Ekstra funktion som spiller hop-effekt
         
         # Opdater dash nedkøling
         if not self.can_dash:
@@ -127,8 +127,8 @@ class Spiller:
     def update(self, platform):
         # Hvis spilleren allerede er død, fortsæt med at være død og ikke opdater position
         if self.is_dead:
-            self.speed_y += GRAVITY  # Lad dem fortsætte med at falde
-            self.body.y += self.speed_y
+            self.speed_y += GRAVITY  # Tyngdekraft tilføjes til lodret hastighed
+            self.body.y += self.speed_y # Spilleren rykkes nedad eller opad afhængig af hastighed
             return True  # For at holde spilleren død
         
         # Anvend tyngdekraft
@@ -146,54 +146,54 @@ class Spiller:
             self.body.x = WORLD_RIGHT_BOUNDARY - self.body.width
             self.speed_x = 0
         
-        # Platform kollision (keep this part)
-        if self.body.bottom > platform.y and self.body.top < platform.y:
-            if platform.x < self.body.centerx < platform.x + platform.width:
-                self.body.bottom = platform.y
-                self.speed_y = 0
-                self.on_ground = True
-                self.air_dash = MAX_AIR_DASH
+        # Platform kollision
+        if self.body.bottom > platform.y and self.body.top < platform.y:     # Hvis spillerens bund er over platformen og toppen er under platformen:
+            if platform.x < self.body.centerx < platform.x + platform.width:   # Hvis spillerens midte er mellem platformens venstre og højre kant:
+                self.body.bottom = platform.y   # Juster position så spilleren står på platform
+                self.speed_y = 0                # Sæt lodret hastighed til 0
+                self.on_ground = True          # Spilleren er nu på jorden
+                self.air_dash = MAX_AIR_DASH    # Reset luftdash
         else:
-            self.on_ground = False
+            self.on_ground = False             # Spilleren er ikke på jorden
         
-        # Opdater tæller
-        if self.recovery_frames > 0:
-            self.recovery_frames -= 1
+        # Opdater tæller (recovery frames)
+        if self.recovery_frames > 0:     # Hvis recovery frames er større end 0:
+            self.recovery_frames -= 1    # Reducer recovery frames
         
         if self.invincible:
             self.invincible_timer -= 1
             if self.invincible_timer <= 0:
                 self.invincible = False
         
-        # Opdater combo system
-        if self.combo_timer > 0:
-            self.combo_timer -= 1
-        else:
-            self.combo_count = 0
+        # Hvis der stadig er tid tilbage på comboen, reducer den
+        if self.combo_timer > 0:     # Hvis timeren er større end 0:
+            self.combo_timer -= 1    # Reducer timeren
+        else:                       # Ellers:
+            self.combo_count = 0     # Sæt combo tæller til 0, hvis timeren er udløbet
         
         # Opdater partikler
         self.update_particles()
         
         return False
     
-    def apply_knockback(self, direction, force):
-        if self.invincible:
-            return
+    def apply_knockback(self, direction, force):     # Hvis spilleren bliver ramt:
+        if self.invincible:                          # Spilleren er midlertidigt immun
+            return  
             
         # Beregn tilbageslag med skade skalering
         knockback_bonus = 1 + (self.damage / 75)  # Hurtigere skalering
-        total_force = min(force * knockback_bonus, MAX_KNOCKBACK)
+        total_force = min(force * knockback_bonus, MAX_KNOCKBACK)   
         
         # Anvend tilbageslag med fokus på horisontal bevægelse
-        self.speed_x = direction[0] * total_force * 2.0
-        self.speed_y = direction[1] * total_force - 3
+        self.speed_x = direction[0] * total_force * 2.0  # Horisontal bevægelse
+        self.speed_y = direction[1] * total_force - 3      # Lodret bevægelse
         
         # Stun baseret på skade
         self.stunned = True
         self.stun_time = int(8 * knockback_bonus)
         
-        # Give recovery frames
-        self.recovery_frames = RECOVERY_FRAMES
+        # Giver recovery frames
+        self.recovery_frames = RECOVERY_FRAMES  # Spilleren får et lille vindue hvor de ikke kan rammes igen
         
         # Tilføj hit effekt
         self.add_hit_effect()

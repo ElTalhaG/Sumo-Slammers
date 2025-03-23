@@ -1,0 +1,20 @@
+Pseudokode for apply_knockback()
+
+Hvis spilleren er i recovery eller er udødelig:
+    Stop funktionen
+
+Beregn samlet kraft:
+    Start med den modtagne kraft
+    Forøg kraften baseret på spillerens skadeprocent
+
+Opdater spillerens hastighed:
+    Giv horisontal hastighed baseret på retning og samlet kraft
+    Giv lodret hastighed for at kaste spilleren op
+
+Sæt spillerens recovery-tid:
+    Spiller kan ikke rammes i et antal frames
+
+Gem sidste angriber
+Forøg combo-tælleren
+Sæt combo-timer
+
